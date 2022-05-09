@@ -4,9 +4,9 @@ label: Aries Cloud Agent + redis cache
 admin: [0.0.0.0, 3001]
 admin-insecure-mode: true
 
-# Load toolbox plugin
+# Load plugin
 plugin:
-  - acapy_cache_redis
+  - acapy_cache_redis.v0_1
 
 # Transport
 inbound-transport:
@@ -25,4 +25,4 @@ debug-presentations: true
 auto-accept-invites: true
 auto-accept-requests: true
 connections-invite: true
-log-level: warning
+log-level: debug
