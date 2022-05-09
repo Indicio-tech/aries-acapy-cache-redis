@@ -9,13 +9,14 @@ from aries_cloudagent.config.injection_context import InjectionContext
 from aries_cloudagent.cache.base import BaseCache
 from .redis_base_cache import RedisBaseCache
 
+LOGGER = logging.getLogger(__name__)
+
+LOGGER.warning("Loading Redis Base Cache Plugin module")
 
 async def setup(context: InjectionContext):
     """Load Redis Base Cache Plugin."""
-    log_level = os.environ.get("ACAPY_REDIS_BASE_CACHE_LOG_LEVEL", logging.WARNING)
-    logging.getLogger("acapy_plugin_redis_base_cache").setLevel(log_level)
-    print("Setting logging level of redis base cache to", log_level)
-    context.injector.bind_instance(BaseCache, RedisBaseCache())
+    LOGGER.warning("Loading Redis Base Cache Plugin")
+    #context.injector.bind_instance(BaseCache, RedisBaseCache())
 
 
 __all__ = ["ProblemReport"]

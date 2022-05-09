@@ -6,7 +6,7 @@ admin-insecure-mode: true
 
 # Load toolbox plugin
 plugin:
-  - redis_base_cache
+  - acapy_cache_redis
 
 # Transport
 inbound-transport:
@@ -25,4 +25,4 @@ debug-presentations: true
 auto-accept-invites: true
 auto-accept-requests: true
 connections-invite: true
-log-level: debug
+log-level: warning
