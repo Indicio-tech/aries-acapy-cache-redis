@@ -1,0 +1,28 @@
+label: Aries Cloud Agent + redis cache
+
+# Admin
+admin: [0.0.0.0, 3001]
+admin-insecure-mode: true
+
+# Load toolbox plugin
+plugin:
+  - redis_base_cache
+
+# Transport
+inbound-transport:
+  - [http, 0.0.0.0, 3000]
+outbound-transport: http
+endpoint:
+  - http://localhost:3000
+
+# Ledger
+no-ledger: true
+
+# Connections
+debug-connections: true
+debug-credentials: true
+debug-presentations: true
+auto-accept-invites: true
+auto-accept-requests: true
+connections-invite: true
+log-level: debug
