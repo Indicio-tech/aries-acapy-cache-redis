@@ -1,12 +1,16 @@
+import logging
 from aries_cloudagent.cache.base import BaseCache
 from typing import Any, Sequence, Text, Union
+
+LOGGER = logging.getLogger(__name__)
 
 
 class RedisBaseCache(BaseCache):
     """Redis Base Cache."""
 
-    def __init__(self, redis_client):
+    def __init__(self):
         """Initialize the cache instance."""
+        LOGGER.debug("Initializing Redis Base Cache")
         super().__init__()
         # looks like { "key": { "expires": <epoch timestamp>, "value": <val> } }
 
@@ -21,8 +25,7 @@ class RedisBaseCache(BaseCache):
             The record found or `None`
 
         """
-        raise NotImplementedError
-
+        pass
     async def set(self, keys: Union[Text, Sequence[Text]], value: Any, ttl: int = None):
         """
         Add an item to the cache with an optional ttl.
@@ -33,7 +36,8 @@ class RedisBaseCache(BaseCache):
             ttl: number of second that the record should persist
 
         """
-        raise NotImplementedError
+        #TODO: set redis cache given a key
+        LOGGER.debug("set:", keys, value, ttl)
 
     async def clear(self, key: Text):
         """
@@ -43,16 +47,9 @@ class RedisBaseCache(BaseCache):
             key: the key to remove
 
         """
-        raise NotImplementedError
+        #TODO: clear redis cache given a key
+        pass
 
     async def flush(self):
         """Remove all items from the cache."""
-        raise NotImplementedError
-
-    def acquire(self, key: Text):  # not abstract
-        """Acquire a lock on a given cache key."""
-        raise NotImplementedError
-
-    def release(self, key: Text):  # not abstract
-        """Release the lock on a given cache key."""
-        raise NotImplementedError
+        pass
