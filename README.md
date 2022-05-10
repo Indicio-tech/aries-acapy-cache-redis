@@ -13,7 +13,7 @@ $ poetry install
 $ poetry shell
 ```
 
-Local redis server is for development.
+Local redis server for development.
 
 ```sh
 $ docker run -v /redis.conf:/usr/local/etc/redis --name redis_cache redis redis-server /usr/local/etc/redis/redis.conf
