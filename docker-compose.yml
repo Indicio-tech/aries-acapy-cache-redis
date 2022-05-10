@@ -10,6 +10,9 @@ services:
     build:
       context: ..
       dockerfile: ./docker/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
     volumes:
       - ./acapy-endpoint.sh:/acapy-endpoint.sh:ro,z
     environment:
@@ -30,7 +33,8 @@ services:
       - ./mediator.conf.template:/etc/nginx/templates/default.conf.template:z
   redis:
     image: "redis:alpine"
-
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
     ports:
      - "6379:6379"
 
