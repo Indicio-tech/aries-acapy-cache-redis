@@ -107,7 +107,7 @@ class RedisBaseCache(BaseCache):
             key: the key to remove
 
         """
-        keysDeleted = await self.redis.delete(key)
+        keysDeleted = await self.redis.delete(f"ACA-Py:{key}")
         assert keysDeleted == 1
 
     async def flush(self):
