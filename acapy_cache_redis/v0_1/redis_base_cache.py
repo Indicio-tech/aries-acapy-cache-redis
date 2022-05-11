@@ -108,7 +108,6 @@ class RedisBaseCache(BaseCache):
 
         """
         keysDeleted = await self.redis.delete(f"ACA-Py:{key}")
-        assert keysDeleted == 1
 
     async def flush(self):
         """Remove all items from the cache."""
