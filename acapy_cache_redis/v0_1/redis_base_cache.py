@@ -26,6 +26,7 @@ class RedisBaseCache(BaseCache):
 
         """
         pass
+
     async def set(self, keys: Union[Text, Sequence[Text]], value: Any, ttl: int = None):
         """
         Add an item to the cache with an optional ttl.
@@ -36,7 +37,7 @@ class RedisBaseCache(BaseCache):
             ttl: number of second that the record should persist
 
         """
-        #TODO: set redis cache given a key
+        # TODO: set redis cache given a key
         LOGGER.debug("set:", keys, value, ttl)
 
     async def clear(self, key: Text):
@@ -47,7 +48,7 @@ class RedisBaseCache(BaseCache):
             key: the key to remove
 
         """
-        #TODO: clear redis cache given a key
+        # TODO: clear redis cache given a key
         pass
 
     async def flush(self):
