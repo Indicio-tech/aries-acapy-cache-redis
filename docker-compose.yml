@@ -6,18 +6,24 @@ services:
     ports:
       - 4040:4040
   agent:
-    image: acapy-pickup-mediator
-    build:
-      context: ..
-      dockerfile: ./docker/Dockerfile
+    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.3
+    #build:
+    #  context: ..
+    #  dockerfile: ./docker/Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
     volumes:
       - ./acapy-endpoint.sh:/acapy-endpoint.sh:ro,z
+      - ./acapy_cache_redis:/home/indy/acapy_cache_redis:ro,z
+      - ./docker/default.yml:/home/indy/default.yml:ro,z
     environment:
       TUNNEL_ENDPOINT: http://tunnel:4040
     entrypoint: >
       /bin/sh -c '/acapy-endpoint.sh aca-py "$$@"' --
     command: >
       start --arg-file default.yml
+
   reverse-proxy:
     image: nginx:alpine
     restart: unless-stopped
@@ -26,24 +32,23 @@ services:
       AGENT_WS: "http://agent:3002"
     ports:
       - 80:80
-    volumes:
-      - ./mediator.conf.template:/etc/nginx/templates/default.conf.template:z
+        #volumes:
+        #  - ./mediator.conf.template:/etc/nginx/templates/default.conf.template:z
+
   redis:
     image: "redis:alpine"
-
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
     ports:
      - "6379:6379"
-
     volumes:
       - ./redis-data:/var/lib/redis
-      - ./redis.conf:/etc/redis/redis.conf
-
+      - ./redis.conf:/etc/redis/redis.conf:ro,z
     environment:
      - REDIS_REPLICATION_MODE=master
-
     networks:
       node_net:
-        ipv4_address: 172.28.1.4
+        ipv4_address: 172.128.0.4
 
 # networking for the Redis container
 networks:
@@ -51,7 +56,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: 172.28.0.0/16
+        - subnet: 172.128.0.0/16
 
 #TODO: add a volume for the redis data
 #TODO: add healthcheck and then the agent should have a depends on condition of service_healthy for the service.
