@@ -74,6 +74,10 @@ class RedisBaseCache(BaseCache):
             The record found or `None`
 
         """
+        response = await self.redis.get(f"ACA-Py:{key}")
+        if response is not None:
+            response = json.loads(response)
+        return response
         pass
     async def set(self, keys: Union[Text, Sequence[Text]], value: Any, ttl: int = None):
         """
