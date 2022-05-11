@@ -1,6 +1,10 @@
 import logging
+from aries_cloudagent.core.profile import Profile
 from aries_cloudagent.cache.base import BaseCache
 from typing import Any, Sequence, Text, Union
+
+import aioredis
+import ssl
 
 LOGGER = logging.getLogger(__name__)
 
@@ -8,11 +12,55 @@ LOGGER = logging.getLogger(__name__)
 class RedisBaseCache(BaseCache):
     """Redis Base Cache."""
 
-    def __init__(self):
+    config_key = "redis_cache"
+
+    def __init__(self, root_profile: Profile) -> None:
         """Initialize the cache instance."""
         LOGGER.debug("Initializing Redis Base Cache")
         super().__init__()
         # looks like { "key": { "expires": <epoch timestamp>, "value": <val> } }
+        """Set initial state."""
+        username = None
+        password = None
+        ca_cert = None
+        context = ssl._create_unverified_context()
+        try:
+            plugin_config = root_profile.settings["plugin_config"] or {}
+            config = plugin_config[self.config_key]
+            self.connection = config["connection"]
+        except KeyError as error:
+            raise OutboundQueueConfigurationError(
+                "Configuration missing for redis queue"
+            ) from error
+        try:
+            plugin_config = root_profile.settings["plugin_config"] or {}
+            config = plugin_config[self.config_key]
+            credentials = config["credentials"]
+            username = credentials["username"]
+            password = credentials["password"]
+        except KeyError as error:
+            pass
+            # raise OutboundQueueConfigurationError(
+            #     "Configuration missing for redis queue"
+            # ) from error
+        try:
+            plugin_config = root_profile.settings["plugin_config"] or {}
+            config = plugin_config[self.config_key]
+            lssl = config["ssl"]
+            ca_cert = lssl["cacerts"]
+        except KeyError as error:
+            pass
+            # raise OutboundQueueConfigurationError(
+            #     "Configuration missing for redis queue"
+            # ) from error
+
+        self.prefix = config.get("prefix", "acapy")
+        self.pool = aioredis.ConnectionPool.from_url(
+            self.connection, max_connections=10,
+            username=username, password=password,
+            ssl_ca_certs=ca_cert,
+        )
+        self.redis = aioredis.Redis(connection_pool=self.pool)
 
     async def get(self, key: Text):
         """
