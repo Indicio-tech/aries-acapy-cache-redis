@@ -5,6 +5,7 @@ from typing import Any, Sequence, Text, Union
 
 import aioredis
 import ssl
+import json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -85,7 +86,14 @@ class RedisBaseCache(BaseCache):
 
         """
         #TODO: set redis cache given a key
-        LOGGER.debug("set:", keys, value, ttl)
+        LOGGER.debug("set:%s value:%s ttl:%d", keys, value, ttl)
+        # self._remove_expired_cache_items()
+        # expires_ts = time.perf_counter() + ttl if ttl else None
+        for key in [keys] if isinstance(keys, Text) else keys:
+            # self._cache[key] = {"expires": expires_ts, "value": value}
+            await self.redis.set(f"ACA-Py:{key}", json.dumps(value), ex=ttl)
+
+
 
     async def clear(self, key: Text):
         """
