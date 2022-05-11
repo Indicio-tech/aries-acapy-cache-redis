@@ -1,11 +1,12 @@
+import json
 import logging
-from aries_cloudagent.core.profile import Profile
-from aries_cloudagent.cache.base import BaseCache
+import ssl
 from typing import Any, Sequence, Text, Union
 
 import aioredis
-import ssl
-import json
+from aries_cloudagent.cache.base import BaseCache
+from aries_cloudagent.core.profile import Profile
+from aries_cloudagent.core.error import BaseError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,32 +30,15 @@ class RedisBaseCache(BaseCache):
             plugin_config = root_profile.settings["plugin_config"] or {}
             config = plugin_config[self.config_key]
             self.connection = config["connection"]
-        except KeyError as error:
-            raise OutboundQueueConfigurationError(
-                "Configuration missing for redis queue"
-            ) from error
-        try:
-            plugin_config = root_profile.settings["plugin_config"] or {}
-            config = plugin_config[self.config_key]
             credentials = config["credentials"]
             username = credentials["username"]
             password = credentials["password"]
-        except KeyError as error:
-            pass
-            # raise OutboundQueueConfigurationError(
-            #     "Configuration missing for redis queue"
-            # ) from error
-        try:
-            plugin_config = root_profile.settings["plugin_config"] or {}
-            config = plugin_config[self.config_key]
             lssl = config["ssl"]
             ca_cert = lssl["cacerts"]
         except KeyError as error:
-            pass
-            # raise OutboundQueueConfigurationError(
-            #     "Configuration missing for redis queue"
-            # ) from error
-
+            raise RedisCacheConfigurationError(
+                "Configuration missing for redis queue"
+            ) from error
         self.prefix = config.get("prefix", "acapy")
         self.pool = aioredis.ConnectionPool.from_url(
             self.connection, max_connections=10,
@@ -78,7 +62,6 @@ class RedisBaseCache(BaseCache):
         if response is not None:
             response = json.loads(response)
         return response
-        pass
 
     async def set(self, keys: Union[Text, Sequence[Text]], value: Any, ttl: int = None):
         """
@@ -94,10 +77,12 @@ class RedisBaseCache(BaseCache):
         LOGGER.debug("set:%s value:%s ttl:%d", keys, value, ttl)
         # self._remove_expired_cache_items()
         # expires_ts = time.perf_counter() + ttl if ttl else None
-        for key in [keys] if isinstance(keys, Text) else keys:
-            # self._cache[key] = {"expires": expires_ts, "value": value}
-            await self.redis.set(f"ACA-Py:{key}", json.dumps(value), ex=ttl)
-
+        try:
+            for key in [keys] if isinstance(keys, Text) else keys:
+                # self._cache[key] = {"expires": expires_ts, "value": value}
+                await self.redis.set(f"ACA-Py:{key}", json.dumps(value), ex=ttl)
+        except aioredis.RedisError as error:
+            raise RedisCacheSetKeyValueError("Unexpected redis client exception") from error
 
 
     async def clear(self, key: Text):
@@ -114,3 +99,17 @@ class RedisBaseCache(BaseCache):
     async def flush(self):
         """Remove all items from the cache."""
         pass
+
+class RedisCacheConfigurationError(BaseError):
+    """An error with the redis cache configuration."""
+
+    def __init__(self, message):
+        """Initialize the exception instance."""
+        super().__init__(message)
+
+class RedisCacheSetKeyValueError(BaseError):
+    """An error with the redis cache set key."""
+
+    def __init__(self, message):
+        """Initialize the exception instance."""
+        super().__init__(message)
