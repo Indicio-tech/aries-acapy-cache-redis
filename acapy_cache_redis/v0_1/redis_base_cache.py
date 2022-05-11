@@ -112,4 +112,4 @@ class RedisBaseCache(BaseCache):
 
     async def flush(self):
         """Remove all items from the cache."""
-        pass
+        await self.redis.delete(f"ACA-Py:*")
