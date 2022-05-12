@@ -26,6 +26,8 @@ class RedisBaseCache(BaseCache):
         password = None
         ca_cert = None
         context = ssl._create_unverified_context()
+
+        # Get the connection string
         try:
             plugin_config = root_profile.settings["plugin_config"] or {}
             config = plugin_config[self.config_key]
@@ -34,18 +36,27 @@ class RedisBaseCache(BaseCache):
             raise RedisCacheConfigurationError(
                 "Configuration missing for redis queue"
             ) from error
+
+        # Get the credentials for the redis server (for those with ACL enabled)
         try:
             credentials = config["credentials"]
             username = credentials["username"]
             password = credentials["password"]
         except KeyError as error:
             pass
+
+        # Get the SSL CA Cert information (special redis SSL implementations only)
         try:
             lssl = config["ssl"]
             ca_cert = lssl["cacerts"]
         except KeyError as error:
             pass
-        self.prefix = config.get("prefix", "acapy")
+
+        # Get the prefix to seperate out ACA-Py instances
+        self.prefix = config.get("prefix", "ACA-Py")
+        self.prefix = "ACA-Py" if len(self.prefix) < 1 else self.prefix
+
+        # Setup the aioredis instance
         self.pool = aioredis.ConnectionPool.from_url(
             self.connection, max_connections=10,
             username=username, password=password,
@@ -79,10 +90,7 @@ class RedisBaseCache(BaseCache):
             ttl: number of second that the record should persist
 
         """
-        #TODO: set redis cache given a key
         LOGGER.debug("set:%s value:%s ttl:%d", keys, value, ttl)
-        # self._remove_expired_cache_items()
-        # expires_ts = time.perf_counter() + ttl if ttl else None
         try:
             for key in [keys] if isinstance(keys, Text) else keys:
                 # self._cache[key] = {"expires": expires_ts, "value": value}
