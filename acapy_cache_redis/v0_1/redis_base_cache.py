@@ -65,6 +65,9 @@ class RedisBaseCache(BaseCache):
         )
         self.redis = aioredis.Redis(connection_pool=self.pool)
 
+    def _getKey(key: Text): -> Text
+        return f"{self.prefix}:{key}"
+
     async def get(self, key: Text):
         """
         Get an item from the cache.
@@ -76,7 +79,7 @@ class RedisBaseCache(BaseCache):
             The record found or `None`
 
         """
-        response = await self.redis.get(f"{self.prefix}:{key}")
+        response = await self.redis.get(self._getKey(key))
         if response is not None:
             response = json.loads(response)
         return response
@@ -95,7 +98,7 @@ class RedisBaseCache(BaseCache):
         try:
             for key in [keys] if isinstance(keys, Text) else keys:
                 # self._cache[key] = {"expires": expires_ts, "value": value}
-                await self.redis.set(f"{self.prefix}:{key}", json.dumps(value), ex=ttl)
+                await self.redis.set(self._getKey(key), json.dumps(value), ex=ttl)
         except aioredis.RedisError as error:
             raise RedisCacheSetKeyValueError("Unexpected redis client exception") from error
 
@@ -108,11 +111,11 @@ class RedisBaseCache(BaseCache):
             key: the key to remove
 
         """
-        await self.redis.delete(f"{self.prefix}:{key}")
+        await self.redis.delete(self._getKey(key))
 
     async def flush(self):
         """Remove all items from the cache."""
-        await self.redis.delete(f"{self.prefix}:*")
+        await self.redis.delete(self._getKey("*"))
 
 class RedisCacheConfigurationError(BaseError):
     """An error with the redis cache configuration."""
