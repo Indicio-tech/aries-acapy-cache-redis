@@ -65,7 +65,7 @@ class RedisBaseCache(BaseCache):
         )
         self.redis = aioredis.Redis(connection_pool=self.pool)
 
-    def _getKey(key: Text): -> Text
+    def _getKey(self, key: Text) -> Text:
         return f"{self.prefix}:{key}"
 
     async def get(self, key: Text):
