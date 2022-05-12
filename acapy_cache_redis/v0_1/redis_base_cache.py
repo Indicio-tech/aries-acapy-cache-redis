@@ -79,6 +79,7 @@ class RedisBaseCache(BaseCache):
             response = json.loads(response)
         return response
         pass
+
     async def set(self, keys: Union[Text, Sequence[Text]], value: Any, ttl: int = None):
         """
         Add an item to the cache with an optional ttl.
