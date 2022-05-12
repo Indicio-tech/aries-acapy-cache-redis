@@ -15,6 +15,7 @@ class RedisBaseCache(BaseCache):
     """Redis Base Cache."""
 
     config_key = "redis_cache"
+    prefix = "ACA-Py"
 
     def __init__(self, root_profile: Profile) -> None:
         """Initialize the cache instance."""
@@ -75,7 +76,7 @@ class RedisBaseCache(BaseCache):
             The record found or `None`
 
         """
-        response = await self.redis.get(f"ACA-Py:{key}")
+        response = await self.redis.get(f"{self.prefix}:{key}")
         if response is not None:
             response = json.loads(response)
         return response
@@ -94,7 +95,7 @@ class RedisBaseCache(BaseCache):
         try:
             for key in [keys] if isinstance(keys, Text) else keys:
                 # self._cache[key] = {"expires": expires_ts, "value": value}
-                await self.redis.set(f"ACA-Py:{key}", json.dumps(value), ex=ttl)
+                await self.redis.set(f"{self.prefix}:{key}", json.dumps(value), ex=ttl)
         except aioredis.RedisError as error:
             raise RedisCacheSetKeyValueError("Unexpected redis client exception") from error
 
@@ -107,11 +108,11 @@ class RedisBaseCache(BaseCache):
             key: the key to remove
 
         """
-        keysDeleted = await self.redis.delete(f"ACA-Py:{key}")
+        await self.redis.delete(f"{self.prefix}:{key}")
 
     async def flush(self):
         """Remove all items from the cache."""
-        await self.redis.delete(f"ACA-Py:*")
+        await self.redis.delete(f"{self.prefix}:*")
 
 class RedisCacheConfigurationError(BaseError):
     """An error with the redis cache configuration."""
