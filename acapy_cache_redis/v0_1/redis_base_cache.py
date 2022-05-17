@@ -23,6 +23,9 @@ class RedisBaseCache(BaseCache):
         super().__init__()
         # looks like { "key": { "expires": <epoch timestamp>, "value": <val> } }
         """Set initial state."""
+        username = None
+        password = None
+        ca_cert = None
         context = ssl._create_unverified_context()
 
         # Get the connection string
