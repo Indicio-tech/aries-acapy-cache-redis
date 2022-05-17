@@ -56,8 +56,10 @@ class RedisBaseCache(BaseCache):
 
         # Setup the aioredis instance
         self.pool = aioredis.ConnectionPool.from_url(
-            self.connection, max_connections=10,
-            username=username, password=password,
+            self.connection,
+            max_connections=10,
+            username=username,
+            password=password,
             ssl_ca_certs=ca_cert,
         )
         self.redis = aioredis.Redis(connection_pool=self.pool)
@@ -97,8 +99,9 @@ class RedisBaseCache(BaseCache):
                 # self._cache[key] = {"expires": expires_ts, "value": value}
                 await self.redis.set(self._getKey(key), json.dumps(value), ex=ttl)
         except aioredis.RedisError as error:
-            raise RedisCacheSetKeyValueError("Unexpected redis client exception") from error
-
+            raise RedisCacheSetKeyValueError(
+                "Unexpected redis client exception"
+            ) from error
 
     async def clear(self, key: Text):
         """
