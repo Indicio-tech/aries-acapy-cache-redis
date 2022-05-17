@@ -4,7 +4,7 @@ import ssl
 from typing import Any, Sequence, Text, Union
 
 import aioredis
-from aries_cloudagent.cache.base import BaseCache
+from aries_cloudagent.cache.base import BaseCache, CacheKeyLock
 from aries_cloudagent.core.profile import Profile
 from aries_cloudagent.core.error import BaseError
 
@@ -114,12 +114,46 @@ class RedisBaseCache(BaseCache):
         """Remove all items from the cache."""
         await self.redis.delete(self._getKey("*"))
 
+    # Currently causes ACA-Py to freeze.
+    # TODO: Figure out why this freezes ACA-Py and fix it
+    # def acquire(self, key: Text):
+    #     """Acquire a lock on a given cache key."""
+    #     # result = self.redis.lock(self._getKey(key))
+    #     result = RedisLock(self, self._getKey(key))
+    #     first = self._key_locks.setdefault(key, result)
+    #     return result
+    #     if first is not result:
+    #         result.parent = first
+    #     return result
+
+    # def release(self, key: Text):
+    #     """Release the lock on a given cache key."""
+    #     if key in self._key_locks:
+    #         del self._key_locks[key]
+
+
+class RedisLock(CacheKeyLock):
+    def __init__(self, cache: BaseCache, key: Text):
+        super().__init__(cache, key)
+        self.redis_lock = cache.redis.lock(key, timeout=1)
+
+    async def __aenter__(self):
+        await super().__aenter__()
+        await self.redis_lock.__aenter__()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.redis_lock.__aexit__(exc_type, exc_val, exc_tb)
+        return await super().__aexit__(exc_type, exc_val, exc_tb)
+
+
 class RedisCacheConfigurationError(BaseError):
     """An error with the redis cache configuration."""
 
     def __init__(self, message):
         """Initialize the exception instance."""
         super().__init__(message)
+
 
 class RedisCacheSetKeyValueError(BaseError):
     """An error with the redis cache set key."""
