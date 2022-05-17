@@ -26,7 +26,6 @@ class RedisBaseCache(BaseCache):
         username = None
         password = None
         ca_cert = None
-        context = ssl._create_unverified_context()
 
         # Get the connection string
         try:
