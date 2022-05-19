@@ -1,6 +1,5 @@
 import json
 import logging
-import ssl
 from typing import Any, Sequence, Text, Union
 
 import aioredis
