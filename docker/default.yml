@@ -28,7 +28,7 @@ connections-invite: true
 log-level: debug
 
 plugin-config-value:
-  - redis_cache.connection="rediss://hostname-with-ssl:6379/1"
+  - redis_cache.connection="redis://redis:6379/0"
   # - redis_cache.credentials.username="username"
   # - redis_cache.credentials.password="password"
   # - redis_cache.ssl.cacerts=./ca.crt
