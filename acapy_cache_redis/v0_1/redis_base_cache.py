@@ -1,6 +1,5 @@
 import json
 import logging
-import ssl
 from typing import Any, Sequence, Text, Union
 
 import aioredis
@@ -62,7 +61,7 @@ class RedisBaseCache(BaseCache):
             max_connections=10,
             username=username,
             password=password,
-            ssl_ca_certs=ca_cert,
+            # ssl_ca_certs=ca_cert,
         )
         self.redis = aioredis.Redis(connection_pool=self.pool)
 

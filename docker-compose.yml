@@ -46,17 +46,6 @@ services:
       - ./redis.conf:/etc/redis/redis.conf:ro,z
     environment:
      - REDIS_REPLICATION_MODE=master
-    networks:
-      node_net:
-        ipv4_address: 172.128.0.4
-
-# networking for the Redis container
-networks:
-  node_net:
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.128.0.0/16
 
 #TODO: add a volume for the redis data
 #TODO: add healthcheck and then the agent should have a depends on condition of service_healthy for the service.
