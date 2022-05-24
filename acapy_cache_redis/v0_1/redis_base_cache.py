@@ -44,6 +44,13 @@ class RedisBaseCache(BaseCache):
         except KeyError as error:
             pass
 
+        # Get the connection string
+        try:
+            max_connections = int(config["max_connections"])
+        except:
+            max_connections = 50
+        LOGGER.debug(f"Max Redis Cache Pool connections set to: {max_connections}")
+
         # Get the SSL CA Cert information (special redis SSL implementations only)
         try:
             lssl = config["ssl"]
@@ -58,7 +65,7 @@ class RedisBaseCache(BaseCache):
         # Setup the aioredis instance
         self.pool = aioredis.ConnectionPool.from_url(
             self.connection,
-            max_connections=10,
+            max_connections=max_connections,
             username=username,
             password=password,
             # ssl_ca_certs=ca_cert,
