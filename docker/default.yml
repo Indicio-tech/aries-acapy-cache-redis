@@ -11,9 +11,11 @@ plugin:
 # Transport
 inbound-transport:
   - [http, 0.0.0.0, 3000]
+  - [ws, 0.0.0.0, 3002]
 outbound-transport: http
 endpoint:
-  - http://localhost:3000
+  - http://agent:3000
+  - ws://agent:3002
 
 # Ledger
 no-ledger: true
@@ -28,7 +30,8 @@ connections-invite: true
 log-level: debug
 
 plugin-config-value:
-  - redis_cache.connection="redis://redis:6379/0"
+  - redis_cache.connection="redis://redis-host:6379/0"
+  - redis_cache.max_connections=90
   # - redis_cache.credentials.username="username"
   # - redis_cache.credentials.password="password"
   # - redis_cache.ssl.cacerts=./ca.crt
