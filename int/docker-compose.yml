@@ -18,18 +18,19 @@ services:
         -e http://agent:3000
         --admin 0.0.0.0 3001 --admin-insecure-mode 
         --no-ledger
-        --plugin acapy_cache_redis
+        --plugin acapy_cache_redis.v0_1
+        --plugin-config-value redis_cache.connection="redis://redis-host:6379/0"
         --log-level debug
 
   redis-host:
     image: "redis:alpine"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-    # ports:
-    #  - "6379:6379"
-    volumes:
-      - ./redis-data:/var/lib/redis
-      - ./redis.conf:/etc/redis/redis.conf:ro,z
+    ports:
+     - "6379:6379"
+    # volumes:
+    #   - ./redis-data:/var/lib/redis
+    #   - ./redis.conf:/etc/redis/redis.conf:ro,z
     environment:
      - REDIS_REPLICATION_MODE=master
 

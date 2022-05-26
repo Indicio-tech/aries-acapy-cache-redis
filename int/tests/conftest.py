@@ -16,7 +16,10 @@ from acapy_client.models import (
 from acapy_client.models.conn_record import ConnRecord
 from echo_agent.client import EchoClient
 import httpx
+import aioredis
 import pytest
+from acapy_client.api.schema import publish_schema
+from acapy_client.models.schema_send_request import SchemaSendRequest
 
 
 LOGGER = logging.getLogger(__name__)
@@ -55,6 +58,14 @@ def echo_endpoint():
 def backchannel(backchannel_endpoint):
     """Yield backchannel client."""
     yield Client(base_url=backchannel_endpoint)
+
+
+@pytest.fixture(scope="session")
+async def redis_client():
+    """Yield aioredis client."""
+    redis = aioredis.from_url("redis://redis-host/0")
+    yield redis
+    await redis.close()
 
 
 @pytest.fixture(scope="session")
@@ -132,13 +143,30 @@ async def connection(
     yield conn
 
 
-@pytest.fixture(autouse=True)
-async def clear_questions(backchannel_endpoint: str):
-    yield
-    r = httpx.get(f"{backchannel_endpoint}/qa/get-questions")
-    assert r.status_code == 200
-    results = r.json()["results"]
+@pytest.fixture(scope="module")
+async def create_schema(backchannel: Client):
+    """Schema factory fixture."""
 
-    for thread_id in [result["thread_id"] for result in results]:
-        r = httpx.delete(f"{backchannel_endpoint}/qa/{thread_id}")
-        assert r.status_code == 200
+    async def _create_schema(version):
+        return await publish_schema.asyncio(
+            client=backchannel.with_timeout(60),
+            json_body=SchemaSendRequest(
+                attributes=["attr_1_0", "attr_1_1", "attr_1_2"],
+                schema_name="Test Schema",
+                schema_version=version,
+            ),
+        )
+
+    yield _create_schema
+
+
+# @pytest.fixture(autouse=True)
+# async def clear_questions(backchannel_endpoint: str):
+#     yield
+#     r = httpx.get(f"{backchannel_endpoint}/qa/get-questions")
+#     assert r.status_code == 200
+#     results = r.json()["results"]
+
+#     for thread_id in [result["thread_id"] for result in results]:
+#         r = httpx.delete(f"{backchannel_endpoint}/qa/{thread_id}")
+#         assert r.status_code == 200
