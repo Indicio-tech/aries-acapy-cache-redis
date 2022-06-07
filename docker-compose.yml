@@ -6,13 +6,19 @@ services:
     ports:
       - 4040:4040
   agent:
-    image: bcgovimages/aries-cloudagent:py36-1.16-1_0.7.3
-    #build:
-    #  context: ..
-    #  dockerfile: ./docker/Dockerfile
+    image: acapy-cache-redis
+    build:
+     context: ./
+     dockerfile: ./docker/Dockerfile
     depends_on:
-      redis:
+      redis-host:
         condition: service_healthy
+    links:
+      - redis-host
+      - reverse-proxy
+    ports:
+      - 3000:3000
+      - 3001:3001
     volumes:
       - ./acapy-endpoint.sh:/acapy-endpoint.sh:ro,z
       - ./acapy_cache_redis:/home/indy/acapy_cache_redis:ro,z
@@ -20,7 +26,7 @@ services:
     environment:
       TUNNEL_ENDPOINT: http://tunnel:4040
     entrypoint: >
-      /bin/sh -c '/acapy-endpoint.sh aca-py "$$@"' --
+      /bin/sh -c '/acapy-endpoint.sh poetry run aca-py "$$@"' --
     command: >
       start --arg-file default.yml
 
@@ -28,14 +34,14 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     environment:
-      AGENT_HTTP: "http://agent:3000"
-      AGENT_WS: "http://agent:3002"
+      AGENT_HTTP: "agent:3000"
+      AGENT_WS: "agent:3002"
     ports:
       - 80:80
-        #volumes:
-        #  - ./mediator.conf.template:/etc/nginx/templates/default.conf.template:z
+    volumes:
+     - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:z
 
-  redis:
+  redis-host:
     image: "redis:alpine"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]

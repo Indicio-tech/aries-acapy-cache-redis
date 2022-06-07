@@ -1,0 +1,58 @@
+version: "3"
+services:
+  agent:
+    image: acapy-cache-redis
+    build:
+     context: ../
+     dockerfile: ./docker/Dockerfile
+    depends_on:
+      redis-host:
+        condition: service_healthy
+    # volumes:
+    #   - ./acapy-endpoint.sh:/acapy-endpoint.sh:ro,z
+    #   - ./acapy_cache_redis:/home/indy/acapy_cache_redis:ro,z
+    #   - ./docker/default.yml:/home/indy/default.yml:ro,z
+    command: >
+      start -it http 0.0.0.0 3000 
+        -ot http 
+        -e http://agent:3000
+        --admin 0.0.0.0 3001 --admin-insecure-mode 
+        --no-ledger
+        --plugin acapy_cache_redis.v0_1
+        --plugin-config-value redis_cache.connection="redis://redis-host:6379/0"
+        --log-level debug
+
+  redis-host:
+    image: "redis:alpine"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+    ports:
+     - "6379:6379"
+    # volumes:
+    #   - ./redis-data:/var/lib/redis
+    #   - ./redis.conf:/etc/redis/redis.conf:ro,z
+    environment:
+     - REDIS_REPLICATION_MODE=master
+
+  echo:
+    image: dbluhm/echo-agent:6c22a88
+    ports:
+      - "3002:3002"
+    command: --host 0.0.0.0 --port 3002 --log-level debug
+
+  tests:
+    container_name: juggernaut
+    build:
+      context: .
+    environment:
+      - WAIT_BEFORE_HOSTS=3
+      - WAIT_HOSTS=agent:3000,echo:3002
+      - WAIT_HOSTS_TIMEOUT=60
+      - WAIT_SLEEP_INTERVAL=1
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - AGENT_ENDPOINT=http://agent:3000
+      - ADMIN_ENDPOINT=http://agent:3001
+      - ECHO_ENDPOINT=http://echo:3002
+    depends_on:
+      - agent
+      - echo
