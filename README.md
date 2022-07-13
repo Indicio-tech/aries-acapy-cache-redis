@@ -4,7 +4,13 @@ ACA-Py Redis Base Cache Plugin
 
 ACA-Py uses a modular cache layer to story key-value pairs of data. The purpose
 of this plugin is to allow ACA-Py to use Redis as the storage medium for it's
-caching needs.
+caching needs. When multiple instances of ACA-Py are running, and have a load
+balancer distributing the requests, it is possible for requests during the same
+exchange to be sent to different instances of ACA-Py. Normally, information for
+these requests is cached using the built-in in-memory cache. However, if the
+requests go from agent A, to agent B, then back to agent A, the cache may have
+invalid data that needs to be refreshed since it is all in-memory. Switching
+the backing store from memory to Redis should eliminate this problem entirely.
 
 ## Installation and Usage
 
