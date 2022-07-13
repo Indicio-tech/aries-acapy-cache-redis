@@ -19,9 +19,9 @@ $ docker-compose up --build
 ```
 
 If you are looking to integrate the plugin with your own projects, it is highly
-recommended to take a look at both th
-[docker-compose.yml](./docker-compose.yml) and the [ACA-Py
-default.yml](./docker/default.yml) files to help kickstart your project.
+recommended to take a look at both [docker-compose.yml](./docker-compose.yml)
+and the [ACA-Py default.yml](./docker/default.yml) files to help kickstart your
+project.
 
 ### Without Docker
 
@@ -52,6 +52,22 @@ For manual testing with a second ACA-Py instance, you can run the following.
 $ aca-py start --arg-file ./docker/default.yml --admin 0.0.0.0 3003 \
   -it http 0.0.0.0 3002 -e http://localhost:3002 
 ```
+
+### Configuration
+Within the [default.yml](./docker/default.yml) file, all configuration for the
+Redis Base Cache Plugin resides within the `plugin-config-value` block. The
+configuration options are defined as follows:
+ - `redis_cache.connection` The host connection URI for the Redis server. A
+	 different DB can be selected by adding a `/0` or `/1` to the end of the URI
+	 - The URI may start with `rediss://` for SSL connections and `redis://` for
+		 non-SSL connections
+ - `redis_cache.max_connections` The maximum number of connections to Redis
+	 that the connection pool may allocate
+ - `redis_cache.credentials.username` Username for the Redis server (if not
+	 using the default user)
+ - `redis_cache.credentials.password` The password for the Redis server/user
+ - `redis_cache.ssl.cacerts` Path to the root CA information. Useful for when
+	 using self-signed certificates.
 
 ## Running The Integration Tests
 
