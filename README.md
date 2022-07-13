@@ -6,6 +6,18 @@ ACA-Py uses a modular cache layer to story key-value pairs of data. The purpose
 of this plugin is to allow ACA-Py to use Redis as the storage medium for it's
 caching needs.
 
+_**Why might I need this plugin?**_
+When demand increases, horizontal scaling helps relieve the stress on systems
+by spreading the load across multiple systems. Depending on the algorithm used
+to distribute requests across a cluster, the requests from an individual
+connection may end up on different hosts partway though an exchange of
+information. Normally, ACA-Py caches certain key data *in-memory* to create
+some relief on the database. This has the unintended side-effect of the cache
+getting out of data if the requests switch between machines. Using an external
+system, such as Redis, to manage the cache can ensure that it stays up-to-date
+amongst machines and continues to provide some relief to the database.
+
+
 ## Installation and Usage
 
 ### With Docker (Recommended)
