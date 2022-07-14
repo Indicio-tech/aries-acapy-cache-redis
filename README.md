@@ -1,10 +1,41 @@
-# acapy-cache-redis
-Redis Base Cache Plugin
+# aries-acapy-cache-redis
+ACA-Py Redis Base Cache Plugin
 =======================================
 
-[Add description]
+ACA-Py uses a modular cache layer to story key-value pairs of data. The purpose
+of this plugin is to allow ACA-Py to use Redis as the storage medium for it's
+caching needs.
+
+_**Why might I need this plugin?**_
+When demand increases, horizontal scaling helps relieve the stress on systems
+by spreading the load across multiple systems. Depending on the algorithm used
+to distribute requests across a cluster, the requests from an individual
+connection may end up on different hosts partway though an exchange of
+information. Normally, ACA-Py caches certain key data *in-memory* to create
+some relief on the database. This has the unintended side-effect of the cache
+getting out of data if the requests switch between machines. Using an external
+system, such as Redis, to manage the cache can ensure that it stays up-to-date
+amongst machines and continues to provide some relief to the database.
+
 
 ## Installation and Usage
+
+### With Docker (Recommended)
+Running the plugin with docker is simple and straight-forward. There is an
+example [docker-compose.yml](./docker-compose.yml) file in the root of the
+project that launches both ACA-Py and an accompanying Redis instance. Running
+it is as simple as:
+
+```sh
+$ docker-compose up --build
+```
+
+If you are looking to integrate the plugin with your own projects, it is highly
+recommended to take a look at both [docker-compose.yml](./docker-compose.yml)
+and the [ACA-Py default.yml](./docker/default.yml) files to help kickstart your
+project.
+
+### Without Docker
 
 First, install this plugin into your environment.
 
@@ -13,14 +44,15 @@ $ poetry install
 $ poetry shell
 ```
 
-Local redis server for development.
+Launch a local redis server for development.
 
 ```sh
-$ docker run -v /redis.conf:/usr/local/etc/redis --name redis_cache redis redis-server /usr/local/etc/redis/redis.conf
+$ docker run -d -v `pwd`/redis.conf:/usr/local/etc/redis/redis.conf \
+  --name redis_cache -p 6379:6379 redis redis-server /usr/local/etc/redis/
 ```
 
 When starting up ACA-Py, load the plugin along with any other startup
-parameters.
+parameters. *Note: You may need to change the redis hostname*
 
 ```sh
 $ aca-py start --arg-file ./docker/default.yml
@@ -29,11 +61,29 @@ $ aca-py start --arg-file ./docker/default.yml
 For manual testing with a second ACA-Py instance, you can run the following.
 
 ```sh
-$ aca-py start --arg-file ./docker/default.yml --admin 0.0.0.0 3003 -it http 0.0.0.0 3002 -e http://localhost:3002 
+$ aca-py start --arg-file ./docker/default.yml --admin 0.0.0.0 3003 \
+  -it http 0.0.0.0 3002 -e http://localhost:3002 
 ```
 
-## Running Tests for development
+### Configuration
+Within the [default.yml](./docker/default.yml) file, all configuration for the
+Redis Base Cache Plugin resides within the `plugin-config-value` block. The
+configuration options are defined as follows:
+ - `redis_cache.connection` The host connection URI for the Redis server. A
+	 different DB can be selected by adding a `/0` or `/1` to the end of the URI
+	 - The URI may start with `rediss://` for SSL connections and `redis://` for
+		 non-SSL connections
+ - `redis_cache.max_connections` The maximum number of connections to Redis
+	 that the connection pool may allocate
+ - `redis_cache.credentials.username` Username for the Redis server (if not
+	 using the default user)
+ - `redis_cache.credentials.password` The password for the Redis server/user
+ - `redis_cache.ssl.cacerts` Path to the root CA information. Useful for when
+	 using self-signed certificates.
+
+## Running The Integration Tests
 
 ```sh
-pytest --cov-report term-missing --cov
+$ docker-compose -f int/docker-compose.yml build
+$ docker-compose -f int/docker-compose.yml run tests
 ```
