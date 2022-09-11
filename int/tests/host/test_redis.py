@@ -1,12 +1,13 @@
 """Status Request and response tests"""
 
-from echo_agent.client import EchoClient
-from echo_agent.models import ConnectionInfo
+import httpx
+import logging
 import pytest
 import json
-import httpx
 
-import logging
+from echo_agent.client import EchoClient
+from echo_agent.models import ConnectionInfo
+
 
 LOGGER = logging.getLogger(__name__)
 

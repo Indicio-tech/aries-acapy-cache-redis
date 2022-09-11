@@ -1,4 +1,4 @@
-label: Aries Cloud Agent + redis cache with single host
+label: Aries Cloud Agent + redis cache with cluster
 
 # Admin
 admin: [0.0.0.0, 3001]
@@ -30,8 +30,8 @@ connections-invite: true
 log-level: debug
 
 plugin-config-value:
-  - redis_cache.connection="redis://redis-host:6379/0"
+  - redis_cache.connection="redis://172.28.0.103:6379"
   - redis_cache.max_connections=90
-  # - redis_cache.credentials.username="username"
-  # - redis_cache.credentials.password="password"
+  - redis_cache.credentials.username="default"
+  - redis_cache.credentials.password="test1234"
   # - redis_cache.ssl.cacerts=./ca.crt

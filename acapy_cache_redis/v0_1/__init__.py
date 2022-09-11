@@ -16,7 +16,9 @@ LOGGER = logging.getLogger(__name__)
 async def setup(context: InjectionContext):
     """Load Redis Base Cache Plugin."""
     LOGGER.debug("Loading Redis Base Cache Plugin")
-    context.injector.bind_instance(BaseCache, RedisBaseCache(context))
+    redis_base_cache_inst = RedisBaseCache(context)
+    await redis_base_cache_inst.check_for_redis_cluster()
+    context.injector.bind_instance(BaseCache, redis_base_cache_inst)
 
 
 __all__ = ["ProblemReport"]

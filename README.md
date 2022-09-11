@@ -30,9 +30,21 @@ it is as simple as:
 $ docker-compose up --build
 ```
 
+To launch ACA-Py with an accompanying redis cluster of 6 nodes [3 primararies and 3 replicas], please refer to example [docker-compose.cluster.yml](./docker-compose.cluster.yml) and run the following:
+
+Note: Cluster requires external docker network with specified subnet
+
+```sh
+$ docker network create --subnet=172.28.0.0/24 `network_name`
+$ export REDIS_PASSWORD=" ... As specified in redis_cluster.conf ... "
+$ export NETWORK_NAME="`network_name`"
+$ docker-compose -f docker-compose.cluster.yml up --build
+```
+
 If you are looking to integrate the plugin with your own projects, it is highly
 recommended to take a look at both [docker-compose.yml](./docker-compose.yml)
-and the [ACA-Py default.yml](./docker/default.yml) files to help kickstart your
+and the [ACA-Py default.yml](./docker/default.yml) files for a single redis host setup or at both [docker-compose.cluster.yml](./docker-compose.cluster.yml.yml)
+and the [ACA-Py default_cluster.yml](./docker/default_cluster.yml) files for a redis cluster setup to help kickstart your
 project.
 
 ### Without Docker
@@ -57,6 +69,8 @@ parameters. *Note: You may need to change the redis hostname*
 ```sh
 $ aca-py start --arg-file ./docker/default.yml
 ```
+
+For redis cluster, please review `redis_cluster.conf` and `default_cluster.yml`. Basically `defualt_cluster.yml` includes connection string of a cluster node as `redis_cache.connection`.
 
 For manual testing with a second ACA-Py instance, you can run the following.
 
@@ -83,7 +97,18 @@ configuration options are defined as follows:
 
 ## Running The Integration Tests
 
+### Single redis host
 ```sh
 $ docker-compose -f int/docker-compose.yml build
 $ docker-compose -f int/docker-compose.yml run tests
+```
+
+### Redis cluster
+Cluster requires external docker network with specified subnet
+```sh
+$ docker network create --subnet=172.28.0.0/24 `network_name`
+$ export REDIS_PASSWORD=" ... As specified in redis_cluster.conf ... "
+$ export NETWORK_NAME="`network_name`"
+$ docker-compose -f int/docker-compose.cluster.yml build
+$ docker-compose -f int/docker-compose.cluster.yml run tests
 ```

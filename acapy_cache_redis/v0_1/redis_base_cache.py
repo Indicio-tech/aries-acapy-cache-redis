@@ -1,11 +1,14 @@
+import aioredis
 import json
 import logging
-from typing import Any, Sequence, Text, Union
 
-import aioredis
 from aries_cloudagent.cache.base import BaseCache, CacheKeyLock
 from aries_cloudagent.core.profile import Profile
 from aries_cloudagent.core.error import BaseError
+from redis.asyncio import RedisCluster
+from redis.exceptions import RedisError, RedisClusterException
+from typing import Any, Sequence, Text, Union
+from uuid import uuid4
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,13 +25,14 @@ class RedisBaseCache(BaseCache):
         super().__init__()
         # looks like { "key": { "expires": <epoch timestamp>, "value": <val> } }
         """Set initial state."""
-        username = None
-        password = None
-        ca_cert = None
+        self.username = None
+        self.password = None
+        self.ca_cert = None
+        self.root_profile = root_profile
 
         # Get the connection string
         try:
-            plugin_config = root_profile.settings["plugin_config"] or {}
+            plugin_config = self.root_profile.settings["plugin_config"] or {}
             config = plugin_config[self.config_key]
             self.connection = config["connection"]
         except KeyError as error:
@@ -39,22 +43,22 @@ class RedisBaseCache(BaseCache):
         # Get the credentials for the redis server (for those with ACL enabled)
         try:
             credentials = config["credentials"]
-            username = credentials["username"]
-            password = credentials["password"]
+            self.username = credentials["username"]
+            self.password = credentials["password"]
         except KeyError as error:
             pass
 
         # Get the connection string
         try:
-            max_connections = int(config["max_connections"])
+            self.max_connections = int(config["max_connections"])
         except:
-            max_connections = 50
-        LOGGER.debug(f"Max Redis Cache Pool connections set to: {max_connections}")
+            self.max_connections = 50
+        LOGGER.debug(f"Max Redis Cache Pool connections set to: {self.max_connections}")
 
         # Get the SSL CA Cert information (special redis SSL implementations only)
         try:
             lssl = config["ssl"]
-            ca_cert = lssl["cacerts"]
+            self.ca_cert = lssl["cacerts"]
         except KeyError as error:
             pass
 
@@ -65,12 +69,46 @@ class RedisBaseCache(BaseCache):
         # Setup the aioredis instance
         self.pool = aioredis.ConnectionPool.from_url(
             self.connection,
-            max_connections=max_connections,
-            username=username,
-            password=password,
-            # ssl_ca_certs=ca_cert,
+            max_connections=self.max_connections,
+            username=self.username,
+            password=self.password,
+            # ssl_ca_certs=self.ca_cert,
         )
         self.redis = aioredis.Redis(connection_pool=self.pool)
+
+    async def check_for_redis_cluster(self):
+        """
+        Check if connection corresponds to a cluster node. If so,
+        reassign redis to redis.asyncio.RedisCluster client.
+
+        """
+        try:
+            # Execute a redis SET command on a fake test_key prefix with b""
+            # value. In case, connection string is that of a single redis
+            # host then it will return None as it doesn't exists. Otherwise,
+            # it will raise a MOVED error.
+            fake_test_key = f"test_key_{str(uuid4())}"
+            await self.redis.set(fake_test_key, b"")
+        except aioredis.exceptions.ResponseError as err:
+            if "MOVED" in str(err):
+                self.redis = self.root_profile.inject_or(RedisCluster)
+                if not self.redis:
+                    self.redis = RedisCluster.from_url(
+                        self.connection,
+                        max_connections=self.max_connections,
+                        username=self.username,
+                        password=self.password,
+                    )
+                    # Binds RedisCluster cluster instance, so that it is
+                    # accessible to redis_queue plugin.
+                    LOGGER.info(
+                        "Found redis connection string correspond to a cluster node,"
+                        " reassigning redis to redis.asyncio.RedisCluster client."
+                    )
+                    self.root_profile.injector.bind_instance(RedisCluster, self.redis)
+                    await self.redis.ping(target_nodes=RedisCluster.PRIMARIES)
+                else:
+                    LOGGER.info("Using an existing provided instance of RedisCluster.")
 
     def _getKey(self, key: Text) -> Text:
         return f"{self.prefix}:{key}"
@@ -106,7 +144,11 @@ class RedisBaseCache(BaseCache):
             for key in [keys] if isinstance(keys, Text) else keys:
                 # self._cache[key] = {"expires": expires_ts, "value": value}
                 await self.redis.set(self._getKey(key), json.dumps(value), ex=ttl)
-        except aioredis.RedisError as error:
+        except (
+            aioredis.RedisError,
+            RedisClusterException,
+            RedisError,
+        ) as error:
             raise RedisCacheSetKeyValueError(
                 "Unexpected redis client exception"
             ) from error

@@ -5,7 +5,9 @@ ENV POETRY_HOME=/opt/poetry \
     VENV=/usr/src/app/.venv
 ENV PATH="$POETRY_HOME/bin:$VENV/bin:$PATH"
 
-RUN curl -sSL https://install.python-poetry.org | python -
+# RUN curl -sSL https://install.python-poetry.org | python -
+# Fixes installation failure
+RUN pip3 install --no-cache-dir poetry
 USER indy
 RUN poetry config virtualenvs.create true; poetry config virtualenvs.in-project true
 
