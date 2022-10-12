@@ -88,7 +88,7 @@ class RedisBaseCache(BaseCache):
             # host then it will return None as it doesn't exists. Otherwise,
             # it will raise a MOVED error.
             fake_test_key = f"test_key_{str(uuid4())}"
-            await self.redis.set(fake_test_key, b"")
+            await self.redis.set(fake_test_key, b"", ex=1)
         except aioredis.exceptions.ResponseError as err:
             if "MOVED" in str(err):
                 self.redis = self.root_profile.inject_or(RedisCluster)

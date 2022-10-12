@@ -62,7 +62,7 @@ def backchannel(backchannel_endpoint):
 @pytest.fixture(scope="session")
 async def redis_client():
     """Yield aioredis client."""
-    redis = aioredis.from_url("redis://redis-host/0")
+    redis = aioredis.from_url("redis://redis-host:6379/0")
     yield redis
     await redis.close()
 
