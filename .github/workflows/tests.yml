@@ -26,6 +26,7 @@ jobs:
         if: failure()
         run: |
           docker-compose -f ./int/docker-compose.yml logs
+          docker-compose -f ./int/docker-compose.yml down
       - name: Clean up integration tests
         if: always()
         run: |
