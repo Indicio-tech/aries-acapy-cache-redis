@@ -21,6 +21,9 @@ jobs:
           docker-compose -f ./int/docker-compose.yml run tests-cluster
       - name: Run integration tests - Redis host
         run: |
+          docker network create --subnet=172.28.0.0/24 test_network
+          export REDIS_PASSWORD=test1234
+          export NETWORK_NAME=test_network
           docker-compose -f ./int/docker-compose.yml run tests-host
       - name: Print logs on failure
         if: failure()
