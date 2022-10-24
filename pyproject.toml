@@ -8,6 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = ">=3.6.3"
 aries-cloudagent = "^0.7.3"
 aioredis = "^2.0.1"
+redis = "^4.1.4"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"

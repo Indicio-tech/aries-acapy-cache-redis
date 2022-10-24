@@ -5,22 +5,31 @@ on:
   pull_request:
 
 env:
-  POETRY_VERSION: 1.1.7
+  POETRY_VERSION: 1.1.11
 
 jobs:
   int:
     name: Integration Tests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Run integration tests
-      run: |
-        docker-compose -f ./int/docker-compose.yml run tests
-    - name: Print logs on failure
-      if: failure()
-      run: |
-        docker-compose -f ./int/docker-compose.yml logs
-    - name: Clean up integration tests
-      if: always()
-      run: |
-        docker-compose -f ./int/docker-compose.yml down
+      - uses: actions/checkout@v2
+      - name: Run integration tests - Redis cluster
+        run: |
+          docker network create --subnet=172.28.0.0/24 test_network
+          export REDIS_PASSWORD=test1234
+          export NETWORK_NAME=test_network
+          docker-compose -f ./int/docker-compose.yml run tests-cluster
+      - name: Run integration tests - Redis host
+        run: |
+          export REDIS_PASSWORD=test1234
+          export NETWORK_NAME=test_network
+          docker-compose -f ./int/docker-compose.yml run tests-host
+      - name: Print logs on failure
+        if: failure()
+        run: |
+          docker-compose -f ./int/docker-compose.yml logs
+          docker-compose -f ./int/docker-compose.yml down
+      - name: Clean up integration tests
+        if: always()
+        run: |
+          docker-compose -f ./int/docker-compose.yml down

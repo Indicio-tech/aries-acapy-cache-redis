@@ -1,10 +1,11 @@
 """Common fixtures for testing."""
 
+import aioredis
 import asyncio
 import hashlib
 import logging
 import os
-from typing import Iterator, Optional
+import pytest
 
 from acapy_client import Client
 from acapy_client.api.connection import create_static, delete_connection, set_metadata
@@ -14,12 +15,10 @@ from acapy_client.models import (
     ConnectionStaticResult,
 )
 from acapy_client.models.conn_record import ConnRecord
-from echo_agent.client import EchoClient
-import httpx
-import aioredis
-import pytest
 from acapy_client.api.schema import publish_schema
 from acapy_client.models.schema_send_request import SchemaSendRequest
+from echo_agent.client import EchoClient
+from typing import Iterator, Optional
 
 
 LOGGER = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ def backchannel(backchannel_endpoint):
 @pytest.fixture(scope="session")
 async def redis_client():
     """Yield aioredis client."""
-    redis = aioredis.from_url("redis://redis-host/0")
+    redis = aioredis.from_url("redis://redis-host:6379/0")
     yield redis
     await redis.close()
 
