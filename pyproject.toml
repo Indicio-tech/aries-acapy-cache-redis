@@ -5,20 +5,21 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.6.3"
-aries-cloudagent = "^0.7.3"
+python = ">=3.9.0"
+aries-cloudagent = { version = "^0.9.0", python = ">=3.9" }
 aioredis = "^2.0.1"
 redis = "^4.1.4"
+packaging = { version = ">=23.1,<24.0", python = ">=3.9" }
 
 [tool.poetry.dev-dependencies]
-flake8 = "^3.9.0"
-black = "^22.3.0"
+flake8 = "^6.0.0"
+black = "^23.7.0"
 pytest = "^6.2.2"
 pytest-asyncio = "^0.14.0"
 pytest-cov = "^2.11.1"
 asynctest = "0.13.0"
 pre-commit = "^2.11.1"
-pydid = { version = ">=0.3.3,<0.4.0", python = ">=3.6.9,<4.0.0" }
+pydid = { version = ">=0.3.3,<0.4.0", python = ">=3.9.0,<4.0.0" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
