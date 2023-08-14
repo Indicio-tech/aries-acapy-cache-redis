@@ -5,14 +5,14 @@ on:
   pull_request:
 
 env:
-  POETRY_VERSION: 1.1.11
+  POETRY_VERSION: 1.5.1
 
 jobs:
   int:
     name: Integration Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run integration tests - Redis cluster
         run: |
           docker network create --subnet=172.28.0.0/24 test_network
