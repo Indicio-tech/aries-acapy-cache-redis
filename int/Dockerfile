@@ -1,16 +1,17 @@
-FROM python:3.9
+FROM python:3.9-slim-bullseye
 WORKDIR /usr/src/app/
-RUN pip3 install --no-cache-dir poetry
 
-# Add docker-compose-wait tool
-ENV WAIT_VERSION 2.7.2
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
-RUN chmod +x /wait
+ENV POETRY_HOME=/opt/poetry \
+    VENV=/usr/src/app/.venv
+ENV PATH="$POETRY_HOME/bin:$VENV/bin:$PATH"
 
-COPY pyproject.toml .
-COPY poetry.lock .
+RUN apt-get update && apt-get install -y curl && apt-get clean
+RUN curl -sSL https://install.python-poetry.org | python -
+RUN poetry config virtualenvs.create true; poetry config virtualenvs.in-project true
+
+COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-dev
 
 COPY tests/host/* tests/
 
-ENTRYPOINT ["/bin/sh", "-c", "/wait && poetry run pytest \"$@\"", "--"]
+ENTRYPOINT ["poetry", "run", "pytest"]
