@@ -40,5 +40,5 @@ async def test_send_cred_def(
 
     # Validate that the info matches
     assert connection_info[0]["endpoint"] == echo_endpoint
-    assert connection_info[0]["did"] == response["their_did"]
+    assert connection_info[0]["did"] == f"did:sov:{response['their_did']}"
     assert connection_info[0]["label"] == response["their_label"]
