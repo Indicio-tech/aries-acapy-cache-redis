@@ -12,6 +12,6 @@ RUN poetry config virtualenvs.create true; poetry config virtualenvs.in-project 
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-dev
 
-COPY tests/host/* tests/
+COPY tests/ tests/
 
 ENTRYPOINT ["poetry", "run", "pytest"]
