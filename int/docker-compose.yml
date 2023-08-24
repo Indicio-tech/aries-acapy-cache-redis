@@ -92,7 +92,7 @@ services:
       acapy_default:
         ipv4_address: 172.28.0.103
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a $REDISCLI_AUTH ping | grep PONG"]
+      test: ["CMD-SHELL", "redis-cli -p 6382 -a ${REDIS_PASSWORD} ping | grep PONG"]
       start_period: 15s
       interval: 1s
       timeout: 3s
@@ -242,6 +242,7 @@ services:
         condition: service_healthy
       redis-host:
         condition: service_healthy
+    command: tests/host
 
 networks:
   acapy_default:
