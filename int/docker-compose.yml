@@ -93,6 +93,7 @@ services:
         ipv4_address: 172.28.0.103
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 15s
       interval: 1s
       timeout: 3s
       retries: 5
@@ -210,6 +211,7 @@ services:
       - REDIS_REPLICATION_MODE=master
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 15s
       interval: 1s
       timeout: 3s
       retries: 5
