@@ -45,13 +45,13 @@ class RedisBaseCache(BaseCache):
             credentials = config["credentials"]
             self.username = credentials["username"]
             self.password = credentials["password"]
-        except KeyError as error:
+        except KeyError:
             pass
 
         # Get the connection string
         try:
             self.max_connections = int(config["max_connections"])
-        except:
+        except KeyError:
             self.max_connections = 50
         LOGGER.debug(f"Max Redis Cache Pool connections set to: {self.max_connections}")
 
@@ -59,7 +59,7 @@ class RedisBaseCache(BaseCache):
         try:
             lssl = config["ssl"]
             self.ca_cert = lssl["cacerts"]
-        except KeyError as error:
+        except KeyError:
             pass
 
         # Get the prefix to seperate out ACA-Py instances
