@@ -10,7 +10,7 @@ RUN curl -sSL https://install.python-poetry.org | python -
 RUN poetry config virtualenvs.create true; poetry config virtualenvs.in-project true
 
 RUN mkdir acapy_cache_redis && touch acapy_cache_redis/__init__.py
-COPY README.md setup.py pyproject.toml poetry.lock ./
+COPY README.md pyproject.toml poetry.lock ./
 
 RUN poetry install --no-dev
 
