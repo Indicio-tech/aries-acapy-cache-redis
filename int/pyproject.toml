@@ -13,10 +13,10 @@ acapy-client = {git = "https://github.com/Indicio-tech/acapy-client.git", rev = 
 httpx = "^0.15.5"
 aioredis = "^2.0.1"
 redis = "^4.1.4"
+ruff = "^0.0.287"
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
-flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
