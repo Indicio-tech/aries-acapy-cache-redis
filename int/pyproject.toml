@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "acapy-plugin-qa-int-tests"
+name = "acapy-cache-redis-int-tests"
 version = "0.1.0"
-description = "Integration tests for ACA-Py QA Protocol Plugin"
-authors = ["Daniel Bluhm <dbluhm@pm.me>"]
+description = "Integration tests for ACA-Py Redis Cache Plugin"
+authors = ["Colton Wolkins <colton@indicio.tech"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -16,7 +16,7 @@ redis = "^4.1.4"
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
-flake8 = "^6.0.0"
+ruff = "^0.0.287"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

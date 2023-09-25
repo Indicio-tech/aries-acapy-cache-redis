@@ -5,8 +5,6 @@ import logging
 import pytest
 import json
 
-from echo_agent.client import EchoClient
-from echo_agent.models import ConnectionInfo
 
 
 LOGGER = logging.getLogger(__name__)

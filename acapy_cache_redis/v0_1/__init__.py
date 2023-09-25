@@ -2,7 +2,6 @@ __version__ = "0.1.0"
 
 
 import logging
-import os
 
 from aries_cloudagent.cache.base import BaseCache
 from aries_cloudagent.config.injection_context import InjectionContext
