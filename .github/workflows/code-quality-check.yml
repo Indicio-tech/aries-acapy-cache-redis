@@ -22,3 +22,5 @@ jobs:
         with:
           src: "./acapy_cache_redis"
       - uses: chartboost/ruff-action@v1
+        with:
+          src: "./acapy_cache_redis"
