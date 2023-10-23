@@ -6,7 +6,7 @@ from aries_cloudagent.cache.base import BaseCache, CacheKeyLock
 from aries_cloudagent.core.profile import Profile
 from aries_cloudagent.core.error import BaseError
 from redis.asyncio import RedisCluster
-from redis.exceptions import RedisError, RedisClusterException
+from redis.exceptions import RedisError, RedisClusterException, ResponseError
 from typing import Any, Sequence, Text, Union
 from uuid import uuid4
 
@@ -89,7 +89,7 @@ class RedisBaseCache(BaseCache):
             # it will raise a MOVED error.
             fake_test_key = f"test_key_{str(uuid4())}"
             await self.redis.set(fake_test_key, b"", ex=1)
-        except aioredis.exceptions.ResponseError as err:
+        except ResponseError as err:
             if "MOVED" in str(err):
                 self.redis = self.root_profile.inject_or(RedisCluster)
                 if not self.redis:
