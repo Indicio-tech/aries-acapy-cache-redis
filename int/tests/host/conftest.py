@@ -1,6 +1,6 @@
 """Common fixtures for testing."""
 
-import aioredis
+from redis import asyncio as aioredis
 import asyncio
 import hashlib
 import logging

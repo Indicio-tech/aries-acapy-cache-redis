@@ -1,4 +1,4 @@
-import aioredis
+from redis import asyncio as aioredis
 import json
 import logging
 

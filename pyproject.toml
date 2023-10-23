@@ -7,8 +7,7 @@ authors = ["Colton Wolkins <colton@indicio.tech>", "Kim Ebert <kim@indicio.tech>
 [tool.poetry.dependencies]
 python = "^3.9.0"
 aries-cloudagent = {version = "^0.10.1", extras = ["askar"]}
-aioredis = "^2.0.1"
-redis = "^4.1.4"
+redis = "^4.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.7.0"
