@@ -2,7 +2,7 @@
 name = "acapy-cache-redis-int-tests"
 version = "0.1.0"
 description = "Integration tests for ACA-Py Redis Cache Plugin"
-authors = ["Colton Wolkins <colton@indicio.tech"]
+authors = ["Colton Wolkins <colton@indicio.tech>", "Kim Ebert <kim@indicio.tech>", "Alex Walker <alex.walker@indicio.tech>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
