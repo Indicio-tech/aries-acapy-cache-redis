@@ -15,11 +15,11 @@ async def test_send_and_receive(echo: EchoClient, connection: ConnectionInfo):
     await echo.send_message(
         connection,
         {
-            "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/ping",
+            "@type": "https://didcomm.org/trust_ping/1.0/ping_response",
             "response_resquested": True,
         },
     )
     response = await echo.get_message(connection)
     assert response["@type"] == (
-        "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/trust_ping/1.0/ping_response"
+        "https://didcomm.org/trust_ping/1.0/ping_response"
     )
