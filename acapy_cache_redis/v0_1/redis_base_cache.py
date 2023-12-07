@@ -82,33 +82,26 @@ class RedisBaseCache(BaseCache):
         reassign redis to redis.asyncio.RedisCluster client.
 
         """
-        try:
-            # Execute a redis SET command on a fake test_key prefix with b""
-            # value. In case, connection string is that of a single redis
-            # host then it will return None as it doesn't exists. Otherwise,
-            # it will raise a MOVED error.
-            fake_test_key = f"test_key_{str(uuid4())}"
-            await self.redis.set(fake_test_key, b"", ex=1)
-        except ResponseError as err:
-            if "MOVED" in str(err):
-                self.redis = self.root_profile.inject_or(RedisCluster)
-                if not self.redis:
-                    self.redis = RedisCluster.from_url(
-                        self.connection,
-                        max_connections=self.max_connections,
-                        username=self.username,
-                        password=self.password,
-                    )
-                    # Binds RedisCluster cluster instance, so that it is
-                    # accessible to redis_queue plugin.
-                    LOGGER.info(
-                        "Found redis connection string correspond to a cluster node,"
-                        " reassigning redis to redis.asyncio.RedisCluster client."
-                    )
-                    self.root_profile.injector.bind_instance(RedisCluster, self.redis)
-                    await self.redis.ping(target_nodes=RedisCluster.PRIMARIES)
-                else:
-                    LOGGER.info("Using an existing provided instance of RedisCluster.")
+        cluster_info = await self.redis.info("cluster")
+        if "cluster_enabled" in cluster_info and cluster_info["cluster_enabled"] == 1:
+            self.redis = self.root_profile.inject_or(RedisCluster)
+            if not self.redis:
+                self.redis = RedisCluster.from_url(
+                    self.connection,
+                    max_connections=self.max_connections,
+                    username=self.username,
+                    password=self.password,
+                )
+                # Binds RedisCluster cluster instance, so that it is
+                # accessible to redis_queue plugin.
+                LOGGER.info(
+                    "Found redis connection string correspond to a cluster node,"
+                    " reassigning redis to redis.asyncio.RedisCluster client."
+                )
+                self.root_profile.injector.bind_instance(RedisCluster, self.redis)
+                await self.redis.ping(target_nodes=RedisCluster.PRIMARIES)
+            else:
+                LOGGER.info("Using an existing provided instance of RedisCluster.")
 
     def _getKey(self, key: Text) -> Text:
         return f"{self.prefix}:{key}"
