@@ -20,6 +20,4 @@ async def test_send_and_receive(echo: EchoClient, connection: ConnectionInfo):
         },
     )
     response = await echo.get_message(connection)
-    assert response["@type"] == (
-        "https://didcomm.org/trust_ping/1.0/ping_response"
-    )
+    assert response["@type"] == ("https://didcomm.org/trust_ping/1.0/ping_response")
