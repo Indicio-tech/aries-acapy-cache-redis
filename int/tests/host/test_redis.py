@@ -6,7 +6,6 @@ import pytest
 import json
 
 
-
 LOGGER = logging.getLogger(__name__)
 
 
