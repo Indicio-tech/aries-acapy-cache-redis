@@ -14,6 +14,10 @@ services:
         --plugin acapy_cache_redis.v0_1
         --plugin-config-value redis_cache.connection="redis://default:test1234@172.28.0.103:6382"
         --log-level debug
+        --auto-provision
+        --wallet-name default
+        --wallet-type askar-anoncreds
+        --wallet-key "insecure"
     networks:
       - acapy_default
     depends_on:
@@ -193,6 +197,10 @@ services:
         --plugin acapy_cache_redis.v0_1
         --plugin-config-value redis_cache.connection="redis://redis-host:6379/0"
         --log-level debug
+        --auto-provision
+        --wallet-name default
+        --wallet-type askar-anoncreds
+        --wallet-key "insecure"
     healthcheck:
       test: curl -s -o /dev/null -w '%{http_code}' "http://localhost:3004/status/live" | grep "200" > /dev/null
       start_period: 30s
