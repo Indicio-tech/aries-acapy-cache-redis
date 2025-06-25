@@ -35,3 +35,8 @@ plugin-config-value:
   - redis_cache.credentials.username="default"
   - redis_cache.credentials.password="test1234"
   # - redis_cache.ssl.cacerts=./ca.crt
+
+auto-provision: true
+wallet-name: default
+wallet-type: askar-anoncreds
+wallet-key: "insecure"

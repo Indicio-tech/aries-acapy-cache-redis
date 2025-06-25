@@ -2,9 +2,9 @@ from redis import asyncio as aioredis
 import json
 import logging
 
-from aries_cloudagent.cache.base import BaseCache, CacheKeyLock
-from aries_cloudagent.core.profile import Profile
-from aries_cloudagent.core.error import BaseError
+from acapy_agent.cache.base import BaseCache, CacheKeyLock
+from acapy_agent.core.profile import Profile
+from acapy_agent.core.error import BaseError
 from redis.asyncio import RedisCluster
 from redis.exceptions import RedisError, RedisClusterException
 from typing import Any, Sequence, Text, Union
@@ -97,7 +97,7 @@ class RedisBaseCache(BaseCache):
                     "Found redis connection string correspond to a cluster node,"
                     " reassigning redis to redis.asyncio.RedisCluster client."
                 )
-                self.root_profile.injector.bind_instance(RedisCluster, self.redis)
+                self.root_profile.context.injector.bind_instance(RedisCluster, self.redis)
                 await self.redis.ping(target_nodes=RedisCluster.PRIMARIES)
             else:
                 LOGGER.info("Using an existing provided instance of RedisCluster.")
