@@ -1,4 +1,11 @@
 # aries-acapy-cache-redis
+
+> **⚠️ ARCHIVED REPOSITORY**
+>
+> This repository is being archived because this plugin was contributed to the OpenWallet Foundation ACA-Py Plugins repository. See this link for an up-to-date version: https://github.com/openwallet-foundation/acapy-plugins
+>
+> **Please do not contribute to this repository. All contributions should be made to the [OWF acapy-plugins repository](https://github.com/openwallet-foundation/acapy-plugins).**
+
 ACA-Py Redis Base Cache Plugin
 =======================================
 
